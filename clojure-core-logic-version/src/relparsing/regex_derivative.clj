@@ -101,3 +101,32 @@
        (regex-derivativeo pattern a res)
        (regex-matcho res d out))]))
 
+;; Regex generator guided by many examples or counterexamples, step by step.
+
+(defn regex-speco-step [pdos next-pdos]
+  (conde
+    [(== () pdos)
+     (== () next-pdos)]
+    [(fresh [ap ad ao d]
+       (conso [ap ad ao] d pdos)
+       (conde
+         [(== () ad)
+           (fresh [ra]
+             (conde
+               [(== regex-BLANK ao) (== regex-BLANK ra)]
+               [(== regex-NULL ao) (!= regex-BLANK ra)])
+             (deltao ap ra)
+             (regex-speco-step d next-pdos))]
+         [(fresh [ada add rap next-d]
+            (conso ada add ad)
+            (regex-derivativeo ap ada rap)
+            (conso [rap add ao] next-d next-pdos)
+            (regex-speco-step d next-d))]))]))
+
+(defn regex-speco [pdos]
+  (conde
+    [(== () pdos)]
+    [(!= () pdos)
+     (fresh [next-pdos]
+       (regex-speco-step pdos next-pdos)
+       (regex-speco next-pdos))]))

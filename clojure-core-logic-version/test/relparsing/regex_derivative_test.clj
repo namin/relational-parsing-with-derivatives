@@ -284,3 +284,25 @@
         '(([(rep true) (_0)] :- (sym _0) (sym _0))
           ([(rep true) (_0 _1)] :- (sym _1) (sym _0) (sym _0))
           ([(rep true) (_0 _1 _2)] :- (sym _2) (sym _1) (sym _0) (sym _0))))))
+
+(deftest test-regex-speco
+  (is (= (run 1 [q]
+           (fresh [x nx]
+             (regex-speco [[q '(foo bar bar) regex-BLANK]])))
+        '((rep (alt foo bar)))))
+  ;; >5 seconds
+  (is (= (run 1 [q]
+           (fresh [x nx]
+             (regex-speco
+               [[q '(foo bar bar) regex-BLANK]
+                [q '(foo bar) regex-NULL]])))
+        '((seq foo (seq bar bar)))))
+  (comment
+    ;; doesn't return... :-(
+    (is (= (run 1 [q]
+             (fresh [x nx]
+               (regex-speco
+                 [[q '(foo bar bar bar) regex-BLANK]
+                  [q '(foo bar bar) regex-NULL]
+                  [q '(foo bar) regex-NULL]])))
+          '((seq foo (seq bar (seq bar bar))))))))
